@@ -1,0 +1,38 @@
+---
+name: Switch-Action Test
+deployment:
+ orchestrator:
+   proxy:
+    mapping:
+     serviceA: serviceA_proxy
+     serviceB: serviceB_proxy
+
+ services:
+   - name: "serviceA"
+     host: "serviceA"
+     port: 80
+   - name: "serviceB"
+     host: "serviceB"
+     port: 80
+
+strategies:
+  - name: "switch_action"
+    actions:
+      - switch:
+          next: "A"
+  - name: "A"
+    actions:
+      - route:
+          from: "serviceA"
+          to: "serviceB"
+          filters: []
+  - name: "B"
+    actions:
+      - route:
+          from: "serviceA"
+          to: "serviceB"
+          filters: []
+  - name: "rollback_action"
+    actions:
+      - switch:
+          next: "rollback"

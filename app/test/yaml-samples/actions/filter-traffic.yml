@@ -1,0 +1,26 @@
+---
+name: Docker-Proxy Deployment Release
+deployment:
+ orchestrator:
+   proxy:
+    mapping:
+     serviceA: serviceA_proxy
+     serviceB: serviceB_proxy
+
+ services:
+   - name: "serviceA"
+     host: "serviceA"
+     port: 80
+   - name: "serviceB"
+     host: "serviceB"
+     port: 80
+
+strategies:
+  - name: "filter_action"
+    actions:
+      - route:
+          from: "serviceA"
+          to: "serviceB"
+          filters:
+            - traffic:
+                percentage: 80

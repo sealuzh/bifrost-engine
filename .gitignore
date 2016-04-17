@@ -1,0 +1,11 @@
+node_modules
+public
+.tmp
+.idea
+client/bower_components
+dist
+app/config/local.env.js
+npm-debug.log
+.vagrant
+coverage
+releases.db

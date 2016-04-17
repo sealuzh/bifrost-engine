@@ -1,0 +1,31 @@
+---
+name: Docker-Proxy Deployment Release
+deployment:
+ orchestrator:
+   proxy:
+    mapping:
+     serviceA: serviceA_proxy
+     serviceB: serviceB_proxy
+
+ services:
+   - name: "serviceA"
+     host: "serviceA"
+     port: 80
+   - name: "serviceB"
+     host: "serviceB"
+     port: 80
+
+strategies:
+  - name: "metric_action"
+    actions:
+      - metric:
+          providers:
+            - prometheus:
+                name: serviceAQuery
+                query: "avg_over_time(container_cpu_system_seconds_total{name='serviceA'}[60s])"
+            - prometheus:
+                name: serviceBQuery
+                query: "avg_over_time(container_cpu_system_seconds_total{name='serviceB'}[60s])"
+          validator: serviceAQuery>=serviceBQuery
+          onTrue: "serviceA"
+          onFalse: "serviceB"

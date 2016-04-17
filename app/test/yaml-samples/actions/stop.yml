@@ -1,0 +1,21 @@
+---
+name: Stop-Action Test
+deployment:
+ orchestrator:
+   proxy:
+    mapping:
+     serviceA: serviceA_proxy
+     serviceB: serviceB_proxy
+
+ services:
+   - name: "serviceA"
+     host: "serviceA"
+     port: 80
+   - name: "serviceB"
+     host: "serviceB"
+     port: 80
+
+strategies:
+ - name: Stop-Action
+   actions:
+    - stop:

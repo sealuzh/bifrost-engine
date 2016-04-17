@@ -1,0 +1,8 @@
+node_modules
+public
+.tmp
+.idea
+dist
+app/config/local.env.js
+coverage
+releases.db

@@ -1,0 +1,107 @@
+---
+  name: Docker-Proxy Deployment Release
+  deployment:
+   orchestrator:
+     proxy:
+      mapping:
+       serviceA: serviceA_proxy
+       serviceB: serviceB_proxy
+
+   services:
+     - name: "serviceA"
+       host: "serviceA"
+       port: 80
+     - name: "serviceB"
+       host: "serviceB"
+       port: 80
+  strategies:
+    - name: "health_check"
+      actions:
+        - metric:
+            providers:
+              - prometheus:
+                  query: "avg_over_time(container_cpu_usage_seconds_total{image=\"nginx\",type=\"user\"}[60s])"
+            validator: "<0.02"
+            onTrue: "highCPU"
+            onFalse: "lowCPU"
+        - test:
+            condition:
+              AND:
+                - OR:
+                    - metric:
+                        providers:
+                          - prometheus:
+                              query: "avg_over_time(container_cpu_usage_seconds_total{image=\"nginx\",type=\"user\"}[60s])"
+                        validator: "<0.02"
+                        onTrue: "highCPU"
+                        onFalse: "lowCPU"
+                    - metric:
+                        providers:
+                          - prometheus:
+                              query: "avg_over_time(container_cpu_usage_seconds_total{image=\"nginx\",type=\"user\"}[60s])"
+                        validator: "<0.02"
+                        onTrue: "highCPU"
+                        onFalse: "lowCPU"
+                - OR:
+                    - metric:
+                        providers:
+                          - prometheus:
+                              query: "avg_over_time(container_cpu_usage_seconds_total{image=\"nginx\",type=\"user\"}[60s])"
+                        validator: "<0.02"
+                        onTrue: "highCPU"
+                        onFalse: "lowCPU"
+                    - metric:
+                        providers:
+                          - prometheus:
+                              query: "avg_over_time(container_cpu_usage_seconds_total{image=\"nginx\",type=\"user\"}[60s])"
+                        validator: "<0.02"
+                        onTrue: "highCPU"
+                        onFalse: "lowCPU"
+    - name: "highCPU"
+      actions:
+        - route:
+            from: "worker"
+            to:
+              params: "winner"
+            filters:
+              - Header:
+                  Has: "BETA-Tester"
+              - Traffic:
+                  Percentage: 5
+            interval: 1
+            intervalCount: 5
+        - route:
+            from: "worker"
+            to:
+              params: "loser"
+            filters:
+              - Header:
+                  Has: "BETA-Tester"
+              - Traffic:
+                  Percentage: 5
+            interval: 1
+            intervalCount: 5
+    - name: "lowCPU"
+      actions:
+        - route:
+            from: "worker"
+            to:
+              params: "winner"
+            filters:
+              - Header:
+                  Has: "BETA-Tester"
+              - Traffic:
+                  Percentage: 5
+            interval: 1
+            intervalCount: 5
+        - route:
+            from: "worker"
+            to:
+              params: "loser"
+            filters:
+              - Header:
+                  Has: "BETA-Tester"
+              - Traffic:
+                  Percentage: 5
+            interval: 1
+            intervalCount: 5

@@ -1,0 +1,14 @@
+---
+name: Docker-Proxy Deployment Release
+deployment:
+  orchestrator:
+    proxy:
+      mapping: {"nginx service a": "proxy_serviceA", "nginx service b": "proxy_serviceB"}
+
+  services:
+    - name: "nginx service a"
+      host: "serviceA"
+      port: 80
+    - name: "nginx service b"
+      host: "serviceB"
+      port: 80

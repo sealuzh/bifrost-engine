@@ -1,0 +1,28 @@
+---
+
+name: Docker-Proxy Deployment Release
+deployment:
+ orchestrator:
+   proxy:
+    mapping:
+     serviceA: serviceA_proxy
+     serviceB: serviceB_proxy
+
+ services:
+   - name: "serviceA"
+     host: "serviceA"
+     port: 80
+   - name: "serviceB"
+     host: "serviceB"
+     port: 80
+
+strategies:
+  - name: "metric_action"
+    actions:
+      - metric:
+          providers:
+            - prometheus:
+                query: "avg_over_time(container_cpu_usage_seconds_total{image=\"nginx\",type=\"user\"}[60s])"
+          validator: "<0.02"
+          onTrue: "highCPU"
+          onFalse: "lowCPU"

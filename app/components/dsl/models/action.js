@@ -1,9 +1,11 @@
 import DefaultExecution from './actions/executionWrapper/defaultExecution.js';
 import log from '../../log/log'
+import _ from 'lodash'
 
 export default class Action {
 
     constructor() {
+        this._id = null;
         this.executionWrapper = new DefaultExecution();
         this.name = "Action";
     }
@@ -64,6 +66,20 @@ export default class Action {
      */
     async postEvaluate(strategy, release) {
         return true;
+    }
+
+    update(storedRelease, strategyIndex, actionIndex) {
+        if (this._startedAt !== undefined) {
+            storedRelease.strategies[strategyIndex].actions[actionIndex]._startedAt = this._startedAt;
+        }
+
+        if (this._finishedAt !== undefined) {
+            storedRelease.strategies[strategyIndex].actions[actionIndex]._finishedAt = this._finishedAt;
+        }
+
+        if (this._failedAt !== undefined) {
+            storedRelease.strategies[strategyIndex].actions[actionIndex]._failedAt = this._failedAt;
+        }
     }
 
     reset() {

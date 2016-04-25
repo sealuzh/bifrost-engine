@@ -29,6 +29,28 @@ describe('Engine', function () {
         var release = await Engine.queue(yamlLoader.loadJSON('strategies2.yml'));
         release.constructor.name.should.be.equal('Release');
         release.should.have.property('_id');
+
+        // make sure strategies are attached
+        release.strategies.should.have.lengthOf(3);
+
+        // make sure strategies get properly serialized
+        var strategy = release.strategies[0];
+        strategy.should.have.property('name');
+        strategy.name.should.be.equal('health_check');
+        strategy.actions.should.have.lengthOf(2);
+    });
+
+    it('should update a existing release', async function () {
+        var release = await Engine.queue(yamlLoader.loadJSON('strategies2.yml'));
+        var previousRelease = await Engine.get(release._id);
+
+        // set startedAt date
+        previousRelease._startedAt = new Date();
+        previousRelease.strategies[0]._startedAt = new Date();
+        previousRelease.strategies[0].actions[1]._startedAt = new Date();
+
+        var updatedRelease = await Engine.update(previousRelease);
+        previousRelease.should.be.deepEqual(updatedRelease);
     });
 
     it('should query a release', async function () {

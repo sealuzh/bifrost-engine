@@ -1,5 +1,4 @@
 import log from '../../log/log'
-import uuid from 'node-uuid'
 import _ from 'lodash'
 import socketUpdater from '../progress/socket-updater'
 
@@ -59,6 +58,36 @@ export default class Release {
             this.advanceActiveStrategy();
         }
 
+    }
+
+    update(storedRelease) {
+        this.strategies.forEach(strategy => {
+            strategy.update(storedRelease, this.strategies.indexOf(strategy));
+        });
+
+        if (this.isFinished !== undefined) {
+            storedRelease.isFinished = this.isFinished;
+        }
+
+        if (this.isStopped !== undefined) {
+            storedRelease.isStopped = this.isStopped;
+        }
+
+        if (this.activeStrategyIndex !== undefined) {
+            storedRelease.activeStrategyIndex = this.activeStrategyIndex;
+        }
+
+        if (this._startedAt !== undefined) {
+            storedRelease._startedAt = this._startedAt;
+        }
+
+        if (this._finishedAt !== undefined) {
+            storedRelease._finishedAt = this._finishedAt;
+        }
+
+        if (this._failedAt !== undefined) {
+            storedRelease._failedAt = this._failedAt;
+        }
     }
 
     reset() {

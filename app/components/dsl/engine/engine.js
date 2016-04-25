@@ -2,6 +2,8 @@ import log from '../../log/log'
 import storage from '../../storage/storage'
 import Interpreter from '../interpreter/interpreter'
 import Promise from 'bluebird'
+import uuid from 'node-uuid'
+import _ from 'lodash'
 
 var interpreter = new Interpreter();
 var releases = Promise.promisifyAll(storage.releases);
@@ -27,6 +29,14 @@ export default {
         return release;
     },
 
+    update: async function (release, broadcast) {
+        var storedRelease = await releases.findOneAsync({_id: release._id});
+        release.update(storedRelease);
+        await releases.updateAsync({_id: release._id}, storedRelease);
+        release.broadcastUpdate(broadcast);
+        return release;
+    },
+
     dry: function (releaseJSON) {
         var release = interpreter.parse(releaseJSON);
         return release;
@@ -44,8 +54,7 @@ export default {
             release.broadcastUpdate();
         }
 
-        await releases.updateAsync({_id: release._id}, release);
-        release.broadcastUpdate('deployment:done');
+        this.update(release, 'deployment:done');
     },
 
     continue: async function (id) {
@@ -99,8 +108,8 @@ export default {
 
         log.info({release: release}, `Finished.`);
         release._finishedAt = new Date();
-        await releases.updateAsync({_id: release._id}, release);
-        release.broadcastUpdate();
+        this.update(release);
+
     }
 
 }

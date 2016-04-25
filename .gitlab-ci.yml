@@ -6,21 +6,21 @@ stages:
 build_image:
   stage: build
   script:
-    - docker build -t bifrost-engine .
+    - docker build -t bifrostuzh-engine .
   only:
     - master
 
 test:
   stage: test
   script:
-    - docker run bifrost-engine npm test
+    - docker run bifrostuzh-engine npm test
   only:
     - master
 
 publish:
   stage: deploy
   script:
-    - docker tag -f bifrost-engine localhost:5000/bifrost/engine
-    - docker push localhost:5000/bifrost/engine
+    - docker tag -f bifrostuzh-engine bifrostuzh/engine
+    - docker push bifrostuzh/engine
   only:
     - master

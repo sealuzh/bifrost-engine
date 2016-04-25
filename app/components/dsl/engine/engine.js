@@ -44,14 +44,14 @@ export default {
 
     deploy: async function (id) {
         var release = await this.get(id);
-        release.broadcastUpdate('deployment:queued');
+        this.update(release, 'deployment:queued');
 
         try {
             await release.deploy();
         } catch (err) {
             await release.undeploy();
             release._failedAt = new Date();
-            release.broadcastUpdate();
+            this.update(release);
         }
 
         this.update(release, 'deployment:done');
@@ -75,23 +75,23 @@ export default {
 
         release._startedAt = new Date();
         release._isRunning = true;
-        release.broadcastUpdate();
+        this.update(release);
 
         while (!release.isFinished) {
 
             release.getActiveStrategy()._startedAt = new Date();
             release.getActiveStrategy()._finishedAt = null;
-            release.broadcastUpdate();
+            this.update(release);
 
             try {
                 await release.getActiveStrategy().execute(release);
             } catch (err) {
                 log.info(err);
                 release.getActiveStrategy()._failedAt = new Date();
-                release.broadcastUpdate();
+                this.update(release);
             } finally {
                 release.getActiveStrategy()._finishedAt = new Date();
-                release.broadcastUpdate();
+                this.update(release);
             }
 
             release.nextStrategy();
@@ -99,7 +99,7 @@ export default {
             // Release can be stopped after a strategy
             if (release.isStopped) {
                 this.stopped[release._id] = release;
-                release.broadcastUpdate('release:stop', release._id);
+                this.update(release, 'release:stop');
                 log.info({release: release}, `Stopped.`);
                 return;
             }

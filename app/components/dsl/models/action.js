@@ -1,11 +1,9 @@
 import DefaultExecution from './actions/executionWrapper/defaultExecution.js';
 import log from '../../log/log'
-import _ from 'lodash'
 
 export default class Action {
 
     constructor() {
-        this._id = null;
         this.executionWrapper = new DefaultExecution();
         this.name = "Action";
     }

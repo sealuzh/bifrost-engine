@@ -1,11 +1,9 @@
 import log from '../../log/log'
 import Promise from 'bluebird'
-import _ from 'lodash'
 
 export default class Strategy {
 
     constructor() {
-        this._id = null;
         this.next = null;
     }
 
@@ -32,7 +30,6 @@ export default class Strategy {
     }
 
     update(storedRelease, strategyIndex) {
-
         if (this._startedAt !== undefined) {
             storedRelease.strategies[strategyIndex]._startedAt = this._startedAt;
         }

@@ -109,25 +109,25 @@ export default class Release {
     /**
      * @param {Release} release
      */
-    async deploy() {
+    async deploy(engine) {
 
         log.info({release: this}, 'Deploying...');
 
         // Send Progress
         this.deployment._startedAt = new Date();
         this.deployment._finishedAt = null;
-        this.broadcastUpdate();
+        engine.update(this);
 
         try {
             await this.deployment.deploy();
         } catch (err) {
             log.warn(err, 'Something went wrong while deploying');
             this.deployment._failedAt = new Date();
-            this.broadcastUpdate();
+            engine.update(this);
         } finally {
             log.info({release: this}, 'Successful.');
             this.deployment._finishedAt = new Date();
-            this.broadcastUpdate();
+            engine.update(this);
         }
 
     }
@@ -135,7 +135,7 @@ export default class Release {
     /**
      * @param {Release} release
      */
-    async undeploy() {
+    async undeploy(engine) {
 
         log.info({release: this}, 'Undeploying...');
 
@@ -144,11 +144,11 @@ export default class Release {
         } catch (err) {
             log.warn(err, 'Something went wrong while deploying');
             this.deployment._failedAt = new Date();
-            this.broadcastUpdate();
+            engine.update(this);
         } finally {
             log.info({release: this}, 'Successful.');
             this.deployment._finishedAt = new Date();
-            this.broadcastUpdate();
+            engine.update(this);
         }
 
     }

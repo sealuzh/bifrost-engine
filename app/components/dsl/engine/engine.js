@@ -2,8 +2,6 @@ import log from '../../log/log'
 import storage from '../../storage/storage'
 import Interpreter from '../interpreter/interpreter'
 import Promise from 'bluebird'
-import uuid from 'node-uuid'
-import _ from 'lodash'
 
 var interpreter = new Interpreter();
 var releases = Promise.promisifyAll(storage.releases);
@@ -16,9 +14,18 @@ export default {
         return await releases.findAsync({});
     },
 
+    clean: async function () {
+        await releases.removeAsync({}, {multi: true});
+    },
+
     get: async function (id) {
         var release = await releases.findOneAsync({_id: id});
         release = interpreter.parse(release);
+        return release;
+    },
+
+    getJSON: async function (id, returnRaw) {
+        var release = await releases.findOneAsync({_id: id});
         return release;
     },
 
@@ -47,9 +54,9 @@ export default {
         this.update(release, 'deployment:queued');
 
         try {
-            await release.deploy();
+            await release.deploy(this);
         } catch (err) {
-            await release.undeploy();
+            await release.undeploy(this);
             release._failedAt = new Date();
             this.update(release);
         }

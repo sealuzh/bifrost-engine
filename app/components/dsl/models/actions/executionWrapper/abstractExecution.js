@@ -1,7 +1,6 @@
 export default class AbstractExecution {
 
     constructor() {
-
     }
 
     /**

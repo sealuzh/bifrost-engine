@@ -21,7 +21,7 @@ exports.index = async function (req, res) {
  * Get list of running release
  */
 exports.get = async function (req, res) {
-    var release = await engine.getJSON(req.params.id);
+    var release = await engine.get(req.params.id);
 
     if (!release) {
         return res.status(404).send({err: 'no release found'});

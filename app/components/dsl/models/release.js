@@ -61,8 +61,8 @@ export default class Release {
     }
 
     update(storedRelease) {
-        this.strategies.forEach(strategy => {
-            strategy.update(storedRelease, this.strategies.indexOf(strategy));
+        this.strategies.forEach((strategy, index) => {
+            strategy.update(storedRelease.strategies[index]);
         });
 
         if (this.isFinished !== undefined) {

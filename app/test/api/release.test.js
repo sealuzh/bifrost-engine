@@ -5,7 +5,7 @@ import http from 'http';
 import Engine from '../../components/dsl/engine/engine'
 import yamlLoader from '../utils/yamlLoader'
 
-describe('API: Proxies', function () {
+describe('API: Releases', function () {
 
     var server = http.createServer(restAPI);
     var release;
@@ -36,12 +36,29 @@ describe('API: Proxies', function () {
         response.body.should.be.a.Array();
         response.body.should.be.lengthOf(1);
 
-        // check if engine gave it an ID
-        response.body[0].should.have.property('_id');
+        var responseRelease = response.body[0];
 
-        // check if all properties have been saved
-        releaseJSON._id = response.body[0]._id;
-        response.body[0].should.be.deepEqual(releaseJSON);
+        // check if engine gave it an ID
+        responseRelease.should.have.property('_id');
+        responseRelease.should.have.property('deployment');
+        responseRelease.should.have.property('strategies');
+        responseRelease.strategies.should.be.lengthOf(release.strategies.length);
+
+        // default properties
+        var healthCheck = responseRelease.strategies[0];
+
+        // check for property on strategy
+        healthCheck.name.should.be.equal('health_check');
+
+        // check whether strategy has actions
+        healthCheck.actions.should.be.an.Array();
+        healthCheck.actions.should.be.lengthOf(release.strategies[0].actions.length);
+
+        var metricAction = healthCheck.actions[0];
+        metricAction.name.should.be.equal('Metric');
+        metricAction.providers.should.be.an.Array();
+        metricAction.validator.should.be.equal('<0.02');
+
     });
 
     it('/GET/:id should return a specific release', async function () {
@@ -54,14 +71,34 @@ describe('API: Proxies', function () {
         });
 
         response.statusCode.should.be.equal(200);
-        response.body.should.be.an.Object();
+        var responseRelease = response.body;
+
+        responseRelease.should.be.an.Object();
 
         // should have gotten an id
-        response.body.should.have.property('_id');
+        responseRelease.should.have.property('_id');
 
         // check if engine gave it an ID
-        releaseJSON._id = response.body._id;
-        response.body.should.be.deepEqual(releaseJSON);
+        responseRelease.should.have.property('_id');
+        responseRelease.should.have.property('deployment');
+        responseRelease.should.have.property('strategies');
+        responseRelease.strategies.should.be.lengthOf(release.strategies.length);
+
+        // default properties
+        var healthCheck = responseRelease.strategies[0];
+
+        // check for property on strategy
+        healthCheck.name.should.be.equal('health_check');
+
+        // check whether strategy has actions
+        healthCheck.actions.should.be.an.Array();
+        healthCheck.actions.should.be.lengthOf(release.strategies[0].actions.length);
+
+        var metricAction = healthCheck.actions[0];
+        metricAction.name.should.be.equal('Metric');
+        metricAction.providers.should.be.an.Array();
+        metricAction.validator.should.be.equal('<0.02');
+
     });
 
     it('/GET/:id reflect updates properly', async function () {
@@ -92,26 +129,64 @@ describe('API: Proxies', function () {
         response.statusCode.should.be.equal(200);
         response.body.should.be.an.Object();
 
+        var responseRelease = response.body;
+
         // check if release-properties have been updated
-        response.body.should.have.property('_startedAt');
-        response.body.should.have.property('_finishedAt');
-        response.body.should.have.property('_failedAt');
+        responseRelease.should.have.property('_startedAt');
+        responseRelease.should.have.property('_finishedAt');
+        responseRelease.should.have.property('_failedAt');
 
-        response.body._startedAt.should.equal(updatedRelease._startedAt.toISOString());
-        response.body._finishedAt.should.equal(updatedRelease._finishedAt.toISOString());
-        response.body._failedAt.should.equal(updatedRelease._failedAt.toISOString());
+        responseRelease._startedAt.should.equal(updatedRelease._startedAt.toISOString());
+        responseRelease._finishedAt.should.equal(updatedRelease._finishedAt.toISOString());
+        responseRelease._failedAt.should.equal(updatedRelease._failedAt.toISOString());
 
-        response.body.strategies[0].should.have.property('_startedAt');
-        response.body.strategies[0].should.have.property('_finishedAt');
-        response.body.strategies[0].should.have.property('_failedAt');
+        responseRelease.strategies[0].should.have.property('_startedAt');
+        responseRelease.strategies[0].should.have.property('_finishedAt');
+        responseRelease.strategies[0].should.have.property('_failedAt');
 
-        response.body.strategies[0]._startedAt.should.equal(updatedRelease.strategies[0]._startedAt.toISOString());
-        response.body.strategies[0]._finishedAt.should.equal(updatedRelease.strategies[0]._finishedAt.toISOString());
-        response.body.strategies[0]._failedAt.should.equal(updatedRelease.strategies[0]._failedAt.toISOString());
+        responseRelease.strategies[0]._startedAt.should.equal(updatedRelease.strategies[0]._startedAt.toISOString());
+        responseRelease.strategies[0]._finishedAt.should.equal(updatedRelease.strategies[0]._finishedAt.toISOString());
+        responseRelease.strategies[0]._failedAt.should.equal(updatedRelease.strategies[0]._failedAt.toISOString());
 
-        response.body.strategies[0].actions[0]._startedAt.should.equal(updatedRelease.strategies[0].actions[0]._startedAt.toISOString());
-        response.body.strategies[0].actions[0]._finishedAt.should.equal(updatedRelease.strategies[0].actions[0]._finishedAt.toISOString());
-        response.body.strategies[0].actions[0]._failedAt.should.equal(updatedRelease.strategies[0].actions[0]._failedAt.toISOString());
+        responseRelease.strategies[0].actions[0].should.have.property('_startedAt');
+        responseRelease.strategies[0].actions[0].should.have.property('_finishedAt');
+        responseRelease.strategies[0].actions[0].should.have.property('_failedAt');
+
+        responseRelease.strategies[0].actions[0]._startedAt.should.equal(updatedRelease.strategies[0].actions[0]._startedAt.toISOString());
+        responseRelease.strategies[0].actions[0]._finishedAt.should.equal(updatedRelease.strategies[0].actions[0]._finishedAt.toISOString());
+        responseRelease.strategies[0].actions[0]._failedAt.should.equal(updatedRelease.strategies[0].actions[0]._failedAt.toISOString());
+    });
+
+    it('/GET/:id reflect updates properly', async function () {
+        var updatedRelease = await Engine.get(release._id);
+
+        try {
+            await Engine.start(release);
+        } catch (err) {
+            console.log(err);
+        }
+
+        var response = await request({
+            method: 'GET',
+            uri: 'http://localhost:9090/api/v1/releases/' + updatedRelease._id,
+            simple: false,
+            resolveWithFullResponse: true,
+            json: true
+        });
+
+        response.statusCode.should.be.equal(200);
+        response.body.should.be.an.Object();
+
+        var responseRelease = response.body;
+        responseRelease.should.have.property('_startedAt');
+        responseRelease.should.have.property('_finishedAt');
+        responseRelease.should.not.have.property('_failedAt');
+
+        responseRelease.strategies[0].should.have.property('_startedAt');
+        responseRelease.strategies[0].should.have.property('_finishedAt');
+        responseRelease.strategies[0].should.have.property('_failedAt');
+
+        responseRelease.strategies[0].actions[0].should.have.property('_startedAt');
     });
 
     afterEach(async function (done) {

@@ -3,7 +3,7 @@ import nock from 'nock'
 import restAPI from '../../components/api/'
 import request from 'request-promise'
 import http from 'http';
-import engine from '../../components/dsl/engine/engine'
+import Engine from '../../components/dsl/engine/engine'
 import config from '../../config/environment/index'
 
 describe('API: Proxies', function () {
@@ -28,8 +28,14 @@ describe('API: Proxies', function () {
         var proxyNockB = nock('http://serviceB_proxy:' + config.PROXY_API_PORT);
         proxyNockB.intercept('/api/v1/filters', 'GET').reply(200, bFilters);
 
-        // push release with id 1
-        engine.queue({
+        server.listen(9090, "127.0.0.1", function () {
+            done();
+        });
+
+    });
+
+    beforeEach(async function (done) {
+        var release = await Engine.queue({
             _id: 'e6a15300-d0ad-11e5-8ff4-4185d077faa4',
             deployment: {
                 services: [serviceAConfig, serviceBConfig, serviceCConfig],
@@ -38,11 +44,7 @@ describe('API: Proxies', function () {
                 }
             }
         });
-
-        server.listen(9090, "127.0.0.1", function () {
-            done();
-        });
-
+        done();
     });
 
     it('should successfully retrieve proxy-configuration from requested services', async function () {
@@ -57,6 +59,11 @@ describe('API: Proxies', function () {
         response.statusCode.should.be.equal(200);
         response.body.should.be.a.Array();
         response.body.should.containDeep([aResults, bResults]);
+    });
+
+    afterEach(async function (done) {
+        await Engine.clean();
+        done();
     });
 
     after(function (done) {

@@ -66,17 +66,24 @@ export default class Action {
         return true;
     }
 
-    update(storedRelease, strategyIndex, actionIndex) {
+    update(storedAction) {
+        
+        if (this.actions !== undefined) {
+            this.actions.forEach((action, index) => {
+                action.update(storedAction[Object.keys(storedAction)[0]].actions[index]);
+            });
+        }
+
         if (this._startedAt !== undefined) {
-            storedRelease.strategies[strategyIndex].actions[actionIndex]._startedAt = this._startedAt;
+            storedAction[Object.keys(storedAction)[0]]._startedAt = this._startedAt;
         }
 
         if (this._finishedAt !== undefined) {
-            storedRelease.strategies[strategyIndex].actions[actionIndex]._finishedAt = this._finishedAt;
+            storedAction[Object.keys(storedAction)[0]]._finishedAt = this._finishedAt;
         }
 
         if (this._failedAt !== undefined) {
-            storedRelease.strategies[strategyIndex].actions[actionIndex]._failedAt = this._failedAt;
+            storedAction[Object.keys(storedAction)[0]]._failedAt = this._failedAt;
         }
     }
 

@@ -41,11 +41,6 @@ export default  {
                 }
             });
 
-            socket.on('deploy', function (msg) {
-                var releaseObj = interpreter.parse(msg);
-                Engine.queueDeployment(releaseObj);
-            });
-
             socket.on('disconnect', function () {
                 log.info('BiFrost-Client has disconnected');
             });

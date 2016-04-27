@@ -59,7 +59,7 @@ stream.write = function (obj) {
         console.log(logString);
     }
 
-}
+};
 
 var defaultConfig = {
     name: "engine",

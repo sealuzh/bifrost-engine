@@ -29,22 +29,22 @@ export default class Strategy {
 
     }
 
-    update(storedRelease, strategyIndex) {
+    update(storedStrategy) {
+        this.actions.forEach((action, index) => {
+            action.update(storedStrategy.actions[index]);
+        });
+
         if (this._startedAt !== undefined) {
-            storedRelease.strategies[strategyIndex]._startedAt = this._startedAt;
+            storedStrategy._startedAt = this._startedAt;
         }
 
         if (this._finishedAt !== undefined) {
-            storedRelease.strategies[strategyIndex]._finishedAt = this._finishedAt;
+            storedStrategy._finishedAt = this._finishedAt;
         }
 
         if (this._failedAt !== undefined) {
-            storedRelease.strategies[strategyIndex]._failedAt = this._failedAt;
+            storedStrategy._failedAt = this._failedAt;
         }
-
-        this.actions.forEach(action => {
-            action.update(storedRelease, strategyIndex, this.actions.indexOf(action));
-        });
     }
 
     reset() {

@@ -11,6 +11,6 @@ export default class DefaultExecution extends AbstractExecution {
         let evaluation = await action.evaluate(strategy, release);
         let postEvaluation = await action.postEvaluate(strategy, release);
 
-        return evaluation && postEvaluation;
+        return preEvaluation && evaluation && postEvaluation;
     }
 }

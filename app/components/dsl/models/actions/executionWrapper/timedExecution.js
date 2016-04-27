@@ -27,14 +27,14 @@ export default class TimedExecution extends AbstractExecution {
 
         for (let intervals = 0; intervals < intervalCount; intervals++) {
 
-            log.debug({release: release, strategy: strategy, action: action}, `[${this.intervals + 1}/${intervalCount}] Executing...`);
+            log.debug({release: release, strategy: strategy, action: action}, `[${intervals + 1}/${intervalCount}] Executing...`);
 
             await asyncUtils.delay(delay * 1000);
 
             let promiseResult = await action.evaluate(strategy, release);
             result = promiseResult || result;
 
-            log.info({release: release, strategy: strategy, action: action}, `[${this.intervals + 1}/${intervalCount}] ${result}`);
+            log.info({release: release, strategy: strategy, action: action}, `[${intervals + 1}/${intervalCount}] Result: ${result}`);
 
             await asyncUtils.delay(interval * 1000);
 

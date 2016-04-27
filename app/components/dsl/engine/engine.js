@@ -11,7 +11,11 @@ export default {
     stopped: {},
 
     list: async function () {
-        return await releases.findAsync({});
+        var result = await releases.findAsync({});
+        for (var i = 0; i < result.length; i++) {
+            result[i] = interpreter.parse(result[i]);
+        }
+        return result;
     },
 
     clean: async function () {
@@ -21,11 +25,6 @@ export default {
     get: async function (id) {
         var release = await releases.findOneAsync({_id: id});
         release = interpreter.parse(release);
-        return release;
-    },
-
-    getJSON: async function (id, returnRaw) {
-        var release = await releases.findOneAsync({_id: id});
         return release;
     },
 
@@ -58,10 +57,11 @@ export default {
         } catch (err) {
             await release.undeploy(this);
             release._failedAt = new Date();
-            this.update(release);
+            this.update(release, 'deployment:failed');
+        } finally {
+            this.update(release, 'deployment:done');
         }
 
-        this.update(release, 'deployment:done');
     },
 
     continue: async function (id) {
@@ -76,12 +76,15 @@ export default {
      */
     start: async function (release) {
 
-        if (release._startedAt) {
+        if (release._startedAt !== undefined) {
             log.info({release: release}, `Release continues`);
+        } else {
+            log.info({release: release}, `Release starts`);
+            release._startedAt = new Date();
         }
 
-        release._startedAt = new Date();
         release._isRunning = true;
+
         this.update(release);
 
         while (!release.isFinished) {

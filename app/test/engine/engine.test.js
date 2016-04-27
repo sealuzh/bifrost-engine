@@ -4,19 +4,14 @@ import Storage from '../../components/storage/storage'
 
 describe('Engine', function () {
 
-    var releaseId;
+    var releaseId, release, releaseJSON;
 
-    before(function (done) {
-        var release = yamlLoader.loadJSON('strategies.yml');
-
-        Storage.releases.remove({}, {multi: true}, function (err, numRemoved) {
-            if (err) console.log(err);
-            Storage.releases.insert(release, function (err, doc) {
-                releaseId = doc._id;
-                if (err) console.log(err);
-                done();
-            });
-        });
+    beforeEach(async function (done) {
+        await Engine.clean();
+        releaseJSON = yamlLoader.loadJSON('strategies.yml');
+        release = await Engine.queue(releaseJSON);
+        releaseId = release._id;
+        done();
     });
 
     it('should list releases', async function () {
@@ -41,13 +36,14 @@ describe('Engine', function () {
     });
 
     it('should update a existing release', async function () {
-        var release = await Engine.queue(yamlLoader.loadJSON('strategies2.yml'));
+        var release = await Engine.queue(yamlLoader.loadJSON('strategies_and.yml'));
         var previousRelease = await Engine.get(release._id);
 
         // set startedAt date
         previousRelease._startedAt = new Date();
         previousRelease.strategies[0]._startedAt = new Date();
-        previousRelease.strategies[0].actions[1]._startedAt = new Date();
+        previousRelease.strategies[0].actions[0]._startedAt = new Date();
+        previousRelease.strategies[0].actions[0].actions[0]._startedAt = new Date();
 
         var updatedRelease = await Engine.update(previousRelease);
         previousRelease.should.be.deepEqual(updatedRelease);
@@ -62,6 +58,17 @@ describe('Engine', function () {
     it('should verify a release', async function () {
         var release = Engine.dry(yamlLoader.loadJSON('strategies2.yml'));
         release.constructor.name.should.be.equal('Release');
+    });
+
+    it('should correctly start a release', async function () {
+        var release = await Engine.queue(yamlLoader.loadJSON('strategies2.yml'));
+        await Engine.start(release);
+        release.should.have.property('_startedAt');
+    });
+
+    afterEach(async function (done) {
+        await Engine.clean();
+        done();
     });
 
 });

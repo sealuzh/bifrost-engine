@@ -1,10 +1,19 @@
 import yamlLoader from '../utils/yamlLoader'
 import Engine from '../../components/dsl/engine/engine'
 import Storage from '../../components/storage/storage'
+import config from '../../config/environment/index'
+import nock from 'nock'
 
 describe('Engine', function () {
 
     var releaseId, release, releaseJSON;
+
+    before(function (done) {
+        nock(config.PROMETHEUS).filteringPath(function (path) {
+            return '/';
+        }).get('/').times(10).reply(200, {data: {result: [{value: [1455199123.94,"1350.75"]}]}});
+        done();
+    });
 
     beforeEach(async function (done) {
         await Engine.clean();
@@ -68,6 +77,11 @@ describe('Engine', function () {
 
     afterEach(async function (done) {
         await Engine.clean();
+        done();
+    });
+
+    after(function (done) {
+        nock.cleanAll();
         done();
     });
 

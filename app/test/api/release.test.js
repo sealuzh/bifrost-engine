@@ -4,6 +4,8 @@ import request from 'request-promise'
 import http from 'http';
 import Engine from '../../components/dsl/engine/engine'
 import yamlLoader from '../utils/yamlLoader'
+import config from '../../config/environment/index'
+import nock from 'nock'
 
 describe('API: Releases', function () {
 
@@ -12,6 +14,10 @@ describe('API: Releases', function () {
     var releaseJSON;
 
     before(function (done) {
+        nock(config.PROMETHEUS).filteringPath(function (path) {
+            return '/';
+        }).get('/').times(10).reply(200, {data: {result: [{value: [1455199123.94,"1350.75"]}]}});
+
         server.listen(9090, "127.0.0.1", function () {
             done();
         });
@@ -160,11 +166,7 @@ describe('API: Releases', function () {
     it('/GET/:id reflect updates properly', async function () {
         var updatedRelease = await Engine.get(release._id);
 
-        try {
-            await Engine.start(release);
-        } catch (err) {
-            console.log(err);
-        }
+        await Engine.start(updatedRelease);
 
         var response = await request({
             method: 'GET',
@@ -178,14 +180,9 @@ describe('API: Releases', function () {
         response.body.should.be.an.Object();
 
         var responseRelease = response.body;
+
         responseRelease.should.have.property('_startedAt');
-        responseRelease.should.have.property('_finishedAt');
-        responseRelease.should.not.have.property('_failedAt');
-
         responseRelease.strategies[0].should.have.property('_startedAt');
-        responseRelease.strategies[0].should.have.property('_finishedAt');
-        responseRelease.strategies[0].should.have.property('_failedAt');
-
         responseRelease.strategies[0].actions[0].should.have.property('_startedAt');
     });
 
@@ -195,6 +192,7 @@ describe('API: Releases', function () {
     });
 
     after(function (done) {
+        nock.cleanAll();
         server.close();
         done();
     });

@@ -5,6 +5,7 @@ export default class Traffic extends Filter {
     constructor() {
         super();
         this.percentage = 100;
+        this.step = 5;
         this.sticky = false;
         this.shadow = false;
     }
@@ -13,7 +14,7 @@ export default class Traffic extends Filter {
         var appliedPercentage = this.percentage;
 
         if (intervals) {
-            appliedPercentage = Math.min(this.percentage * intervals, 100);
+            appliedPercentage = Math.min(this.percentage + (this.step * intervals), 100);
         }
 
         return {

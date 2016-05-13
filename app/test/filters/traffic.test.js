@@ -57,6 +57,18 @@ describe('Filter: Header', function () {
     });
 
     it('should successfully use intervals', async function () {
+        var result = httpTraffic.constructFilterOptions(fromService, targetService, 4);
+        result.should.be.eql({
+            sticky: false,
+            traffic: 100,
+            shadow: false,
+            targetHost: "serviceBHost",
+            targetPort: 80
+        });
+    });
+
+    it('should successfully use intervals and stepsize', async function () {
+        httpTraffic.step = 10;
         var result = httpTraffic.constructFilterOptions(fromService, targetService, 2);
         result.should.be.eql({
             sticky: false,
@@ -69,7 +81,7 @@ describe('Filter: Header', function () {
 
     it('should successfully shadow traffic', async function () {
         httpTraffic.shadow = true;
-        var result = httpTraffic.constructFilterOptions(fromService, targetService, 2);
+        var result = httpTraffic.constructFilterOptions(fromService, targetService, 4);
         result.should.be.eql({
             sticky: false,
             traffic: 100,

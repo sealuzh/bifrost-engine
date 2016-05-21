@@ -32,9 +32,10 @@ export default class Prometheus extends Action {
             var metric = this.extractMetric(responseObj);
             log.info({release: release, strategy: strategy, action: this}, `Result: ${metric}`);
         } catch (err) {
-            log.warn({release: release, strategy: strategy, action: this}, err.toString());
+            log.warn({release: release, strategy: strategy, action: this}, responseObj.statusCode);
+            log.warn({release: release, strategy: strategy, action: this}, JSON.parse(responseObj.body));
             log.warn({release: release, strategy: strategy, action: this}, `Querying prometheus or extracting the result failed. Retrying...`);
-            if (this.tries < MAX_NUMBER_OF_TRIES) {
+            if (this.tries <= MAX_NUMBER_OF_TRIES) {
                 return this.evaluate(strategy, release);
             } else {
                 throw err;
@@ -45,10 +46,22 @@ export default class Prometheus extends Action {
     }
 
     queryPrometheus(query, time) {
-        return request({uri: `${this.prometheusUrl}/api/v1/query?query=${query}&time=${time.getTime() / 1000}`, simple: false, resolveWithFullResponse: true});
+        var uri = `${this.prometheusUrl}/api/v1/query?query=${query}`;
+
+        if (this.time != null) {
+            uri += `&time=${time.getTime() / 1000}`;
+        }
+
+        return request({uri: uri, simple: false, resolveWithFullResponse: true});
     }
 
     extractMetric(responseObj) {
+        var result = JSON.parse(responseObj.body).data.result[0];
+
+        if (Array.isArray(result) && result.length == 0) {
+            return 0;
+        }
+
         return JSON.parse(responseObj.body).data.result[0].value[1]; // TODO: This doesn't seem right. It should also work with non-scalar outputs.
     }
 

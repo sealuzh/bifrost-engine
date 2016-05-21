@@ -22,3 +22,10 @@ There are a number of various gulp tasks that are able to help you during develo
 * `gulp babel`: Transpiles the code to backwards compatible ECMAScript2015-compliant JavaScript
 * `gulp test`: Runs the mocha test suite.
 * `gulp serve`: Starts the Bifrost Engine using [nodemon](https://github.com/remy/nodemon), automatically restarting the process upon code changes. Perfect for development!
+
+### Run with Docker
+You can always use our official Docker-Image to run the Engine.
+
+```
+docker run -p 8000:80 -d bifrostuzh/engine
+```
